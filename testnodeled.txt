@@ -1,0 +1,92 @@
+#include <Wire.h>                     // Include Wire.h for I2C functionality
+ int led=0;
+ #include <Adafruit_NeoPixel.h>
+#define NUMSLEDs  2
+#define PINSLEDs  10
+Adafruit_NeoPixel SLEDs = Adafruit_NeoPixel(NUMSLEDs,PINSLEDs, NEO_RGB + NEO_KHZ800);
+void setup()
+{
+  Serial.begin(9600);                 // Start Serial 
+  Serial.println("Sketch begin");     // Print begin message
+  Wire.begin();   // Initialize I2C Bus
+  pinMode(D3,INPUT);
+  SLEDs.begin(); // This initializes the NeoPixel library.
+  SLEDs.show(); // Initialize all SLEDs to 'off'
+}
+
+void loop(){
+  
+  unsigned int read_value1 = 0; 
+  unsigned int read_value2 = 0; 
+  unsigned int read_value3 = 0; // Sets/reset the variable for reading DAC to 0
+  unsigned int vref = 4095;           // Sets vref value for calculations (set to 2500 for internal reference)
+  float R = 0; 
+  float G = 0; 
+  float B = 0; // Sets/reset the variable for voltage caltulations to 0
+  
+             
+    read_value1 = read(0x48,1,1);                 // Read value of ADC channel x (0 to 7) in Single-ended mode
+    R = read_value1 * (vref / 4095.0); 
+Serial.print("Channel 1 :"); 
+ Serial.println(R,0);   
+    read_value2 = read(0x48,2,1);                 // Read value of ADC channel x (0 to 7) in Single-ended mode
+    G = read_value2 * (vref / 4095.0); 
+Serial.print("Channel 2 :"); 
+ Serial.println(G,0);
+    read_value3 = read(0x48,3,1);                 // Read value of ADC channel x (0 to 7) in Single-ended mode
+    B = read_value3 * (vref / 4095.0); 
+Serial.print("Channel 3 :"); 
+ Serial.println(B,0);
+                     // Prints...
+    //Serial.print(read_value);                 // Prints value read from ADC
+    //Serial.print(" (");                       // Prints...
+    //Serial.print(voltage,0);                  // Prints value of DAC output voltage on channel 0 to serial monitor
+    //Serial.println(" mV)"); 
+    // Prints...
+  
+ if(digitalRead(D3)==0)
+ {
+  led=led+1;
+  delay(200);
+ }
+ if(led==2)
+ {
+  led=0;
+ }
+  
+  if (led==0){
+    SLEDs.setPixelColor(1, SLEDs.Color(R, G, B)); //Adjust brightness, Color blue
+    SLEDs.setPixelColor(0, SLEDs.Color(0, 0, 0)); //Adjust brightness, Color blue
+    SLEDs.show();
+  }
+  else{
+    SLEDs.setPixelColor(0, SLEDs.Color(R, G, B)); //Adjust brightness, Color blue
+    SLEDs.setPixelColor(1, SLEDs.Color(0, 0, 0)); //Adjust brightness, Color blue
+    SLEDs.show();
+  }
+  
+
+  delay(1000);                           // Wait for 1 second
+}
+int read(unsigned char ads_address,unsigned char channel, int mode){
+  // command address for the channels, allows 0-7 channel mapping in the correct order
+  unsigned char channels[3] = {0x00, 0x40, 0x10}; 
+  unsigned char command = 0;    // Initialize command variable
+  unsigned int reading = 0;     // Initialize reading variable 
+  command = channels[channel];      // put required channel address in command variable 
+  if (mode){
+    command = command ^ 0x80;     // Enable Single-ended mode (toggle MSB, SD bit in datasheet)
+  }
+  Wire.beginTransmission(ads_address);  // Send a start or repeated start command with a slave address and the R/W bit set to '0' for writing.
+  Wire.write(command);            // Then send a command byte for the register to be read.
+  Wire.endTransmission();       // Send stop command 
+  delay(10);
+  Wire.requestFrom(ads_address, 2);   // Request 2 bytes from the ADC
+  if(2 <= Wire.available())       // if two bytes were received
+  {
+    reading = Wire.read();        // receive high byte
+    reading = reading << 3;       // shift high byte to be high 8 bits
+    reading |= Wire.read();       // receive low byte into lower 8 bits
+  }
+  return reading;         // return the full 12 bits reading from the ADC channel
+}
