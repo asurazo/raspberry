@@ -1,0 +1,51 @@
+#define BLYNK_PRINT Serial
+
+
+#include <ESP8266WiFi.h>
+#include <BlynkSimpleEsp8266.h>
+#include <Adafruit_NeoPixel.h>
+#define NUMSLEDs  2
+#define PINSLEDs  10
+Adafruit_NeoPixel SLEDs = Adafruit_NeoPixel(NUMSLEDs,PINSLEDs, NEO_RGB + NEO_KHZ800);
+char auth[] = "493e0e8375954b5da3d908e0b8c207b8";
+
+// Your WiFi credentials.
+// Set password to "" for open networks.
+char ssid[] = "sorryyy";
+char pass[] = "123456789";
+int s1,s2,s3;
+BLYNK_WRITE(V1)
+{
+  s1 = param.asInt(); // assigning incoming value from pin V1 to a variable
+}
+BLYNK_WRITE(V2)
+{
+  s2 = param.asInt(); // assigning incoming value from pin V1 to a variable
+}
+BLYNK_WRITE(V3)
+{
+  s3 = param.asInt(); // assigning incoming value from pin V1 to a variable
+}
+void setup()
+{
+  // Debug console
+  Serial.begin(9600);
+
+  Blynk.begin(auth, ssid, pass);
+  SLEDs.begin(); // This initializes the NeoPixel library.
+  SLEDs.show(); // Initialize all SLEDs to 'off'
+}
+
+void loop()
+{
+  Serial.println(s1);
+  Serial.println(s2);
+  Serial.println(s3);
+  delay(300);
+  int val = map(analogRead(A0),0,1023,0,255);
+  SLEDs.setPixelColor(0, SLEDs.Color(s1, s2, s3)); //Adjust brightness, Color red 
+  SLEDs.setPixelColor(1, SLEDs.Color(s1, s2, s3)); //Adjust brightness, Color blue
+  SLEDs.show();
+  Blynk.run();
+  
+}
