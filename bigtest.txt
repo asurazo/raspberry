@@ -1,0 +1,228 @@
+from neopixel import *
+import Adafruit_SSD1306
+import RPi.GPIO as GPIO
+import time
+from PIL import Image,ImageDraw,ImageFont
+
+RST = 1
+disp = Adafruit_SSD1306.SSD1306_128_64(rst=RST)
+disp.begin()
+
+disp.clear()
+c=0
+GPIO.setwarnings(False)
+GPIO.setmode(GPIO.BCM)
+GPIO.setup(25,GPIO.OUT)
+GPIO.setup(26,GPIO.OUT)
+GPIO.setup(27,GPIO.OUT)
+GPIO.setup(22,GPIO.IN,pull_up_down=GPIO.PUD_UP)
+GPIO.setup(17,GPIO.IN,pull_up_down=GPIO.PUD_UP)
+GPIO.setup(23,GPIO.IN,pull_up_down=GPIO.PUD_UP)
+GPIO.setup(18,GPIO.IN,pull_up_down=GPIO.PUD_UP)
+GPIO.setup(6,GPIO.IN,pull_up_down=GPIO.PUD_UP)
+GPIO.setup(13,GPIO.IN,pull_up_down=GPIO.PUD_UP)
+def wan():
+	width = disp.width
+	height = disp.height  
+	image = Image.new('1', (width, height))
+	draw = ImageDraw.Draw(image)
+	font = ImageFont.truetype('VCR_OSD_MONO_1.001.ttf',22)
+	draw.text((0,0), 'R',font=font, fill=1)
+	draw.text((40,0), 'G',font=font, fill=1)
+	draw.text((80,0), 'B',font=font, fill=1)
+	draw.text((0,25), str(red),font=font, fill=1)
+	draw.text((40,25), str(green),font=font, fill=1)
+	draw.text((80,25), str(blue),font=font, fill=1)
+	draw.text((0,45), '^',font=font, fill=1)
+	disp.image(image)
+	disp.display()
+def too():
+	width = disp.width
+	height = disp.height  
+	image = Image.new('1', (width, height))
+	draw = ImageDraw.Draw(image)
+	font = ImageFont.truetype('VCR_OSD_MONO_1.001.ttf',22)
+	draw.text((0,0), 'R',font=font, fill=1)
+	draw.text((40,0), 'G',font=font, fill=1)
+	draw.text((80,0), 'B',font=font, fill=1)
+	draw.text((0,25), str(red),font=font, fill=1)
+	draw.text((40,25), str(green),font=font, fill=1)
+	draw.text((80,25), str(blue),font=font, fill=1)
+	draw.text((40,45), '^',font=font, fill=1)
+	disp.image(image)
+	disp.display()
+def tee():
+	width = disp.width
+	height = disp.height  
+	image = Image.new('1', (width, height))
+	draw = ImageDraw.Draw(image)
+	font = ImageFont.truetype('VCR_OSD_MONO_1.001.ttf',22)
+	draw.text((0,0), 'R',font=font, fill=1)
+	draw.text((40,0), 'G',font=font, fill=1)
+	draw.text((80,0), 'B',font=font, fill=1)
+	draw.text((0,25), str(red),font=font, fill=1)
+	draw.text((40,25), str(green),font=font, fill=1)
+	draw.text((80,25), str(blue),font=font, fill=1)
+	draw.text((80,45), '^',font=font, fill=1)
+	disp.image(image)
+	disp.display()
+red=0
+green=0
+blue=0
+t=1
+a=1
+h=0
+red1=""
+green1=""
+blue1=""
+LED_COUNT      = 1       # Number of LED pixels.
+LED_PIN        = 12      # GPIO pin connected to the pixels (must support PWM!).
+LED_FREQ_HZ    = 800000  # LED signal frequency in hertz (usually 800khz)
+LED_DMA        = 5       # DMA channel to use for generating signal (try 5)
+LED_BRIGHTNESS = 255     # Set to 0 for darkest and 255 for brightest
+LED_INVERT     = False   # True to invert the signal (when using NPN transistor level shift)
+strip = Adafruit_NeoPixel(LED_COUNT, LED_PIN, LED_FREQ_HZ, LED_DMA, LED_INVERT, LED_BRIGHTNESS)
+	# Intialize the library (must be called once before other functions).
+strip.begin()
+while(1):
+	while (t==1):
+		width = disp.width
+		height = disp.height  
+		image = Image.new('1', (width, height))
+		draw = ImageDraw.Draw(image)
+		font = ImageFont.truetype('VCR_OSD_MONO_1.001.ttf',20)
+		draw.text((0,0), 'R',font=font, fill=1)
+		draw.text((40,0), 'G',font=font, fill=1)
+		draw.text((80,0), 'B',font=font, fill=1)
+		draw.text((0,25), str(red),font=font, fill=1)
+		draw.text((40,25), str(green),font=font, fill=1)
+		draw.text((80,25), str(blue),font=font, fill=1)
+		disp.image(image)
+		disp.display()
+		t=t-1
+	
+	s1=GPIO.input(6)
+	s2=GPIO.input(23)
+	s3=GPIO.input(22)
+	
+	if s1==0:
+		print("up")
+		time.sleep(0.3)
+		c=c-1
+		if c==0:
+			c=3
+	if s2==0:
+		print("down")
+		time.sleep(0.3)
+		c=c+1
+		if c==4:
+			c=1
+	if c==1:
+		wan()
+		led=25
+	if c==2:
+		too()
+		led=26
+	if c==3:
+		tee()
+		led=27	
+	if s3==0:
+		print("Enter")
+		time.sleep(0.3)
+		
+		#while (t==0):
+		#	width = disp.width
+		#	height = disp.height  
+		#	image = Image.new('1', (width, height))
+		#	draw = ImageDraw.Draw(image)
+		#	font = ImageFont.truetype('VCR_OSD_MONO_1.001.ttf',22)
+		#	draw.text((0,0), '  LED ON',font=font, fill=1)
+		#	draw.text((0,20),'  LED OFF',font=font, fill=1)
+		#	disp.image(image)
+		#	disp.display()
+		#	t=t+1
+		a=1
+		
+		while (a==1):
+			s1=GPIO.input(6)
+			s2=GPIO.input(23)
+			s3=GPIO.input(22)
+			s4=GPIO.input(17)
+			s5=GPIO.input(18)
+			if led==25:
+				if s4==0:
+					print("++")
+					time.sleep(0.3)
+					red = red+1
+					red1 = str(red)
+					print(red1)
+					wan()
+					strip.setPixelColor(0, Color(green, red, blue))# Red  
+					strip.show()
+					time.sleep(0.3)
+					if red>=255:
+						red=0
+				if s5==0:
+					print("--")
+					time.sleep(0.3)
+					red = red-1
+					print(red)
+					wan()
+					strip.setPixelColor(0, Color(green, red, blue))# Red  
+					strip.show()
+					time.sleep(0.3)
+					if red <=0:
+						red = 255
+			if led==26:
+				if s4==0:
+					print("++")
+					time.sleep(0.3)
+					green = green+1
+					green1= str(green)
+					print(green1)
+					too()
+					strip.setPixelColor(0, Color(green, red, blue))# Red  
+					strip.show()
+					time.sleep(0.3)
+					if green>=255:
+						green=0
+				if s5==0:
+					print("--")
+					time.sleep(0.3)
+					green = green-1
+					green1= str(green)
+					print(green1)
+					too()
+					strip.setPixelColor(0, Color(green, red, blue))# Red  
+					strip.show()
+					time.sleep(0.3)
+					if green <=0:
+						green = 255
+			if led==27:
+				if s4==0:
+					print("++")
+					time.sleep(0.3)
+					blue = blue+1
+					blue1 = str(blue)
+					print(blue1)
+					tee()
+					strip.setPixelColor(0, Color(green, red, blue))# Red  
+					strip.show()
+					time.sleep(0.3)
+					if blue>=255:
+						blue=0
+				if s5==0:
+					print("--")
+					time.sleep(0.3)
+					blue = blue-1
+					blue1 = str(blue)
+					print(blue1)
+					tee()
+					strip.setPixelColor(0, Color(green, red, blue))# Red  
+					strip.show()
+					time.sleep(0.3)
+					if blue <= 0 :
+						blue = 255
+			if s1==0 or s2==0:
+				a=a+1
+					
