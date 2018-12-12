@@ -1,0 +1,41 @@
+import serial
+import time
+import Adafruit_SSD1306
+import io 
+import RPi.GPIO as GPIO
+
+ser = serial.Serial('/dev/ttyUSB0',19200, timeout=0.25) # open serial port on USB
+counter = "Doz"
+from PIL import Image,ImageDraw,ImageFont
+RST = 1
+disp = Adafruit_SSD1306.SSD1306_128_64(rst=RST)
+disp.begin()
+disp.clear()
+count=0
+ser = serial.Serial('/dev/ttyUSB0',19200, timeout=0.25) # open serial port on USB
+GPIO.setup(24,GPIO.IN,pull_up_down=GPIO.PUD_UP)
+
+while 1 :
+	s1=GPIO.input(24)
+	width = disp.width
+	height = disp.height  
+	image = Image.new('1', (width, height))
+	reading = ser.readline().decode('utf-8')
+	if(reading):
+
+		draw = ImageDraw.Draw(image)
+		font = ImageFont.truetype('VCR_OSD_MONO_1.001.ttf',22)
+		draw.text((0,0), 'BH1750',font=font, fill=1)
+		draw.text((0,20), reading,font=font, fill=1)
+		disp.image(image)
+		disp.display()
+		conv_data = counter
+		print(reading)
+	else:
+		print('No data..');
+	if(s1==0):
+		conv_data = "Doz pi your know"
+		ser.write(conv_data.encode('ascii')) # write a string
+		ser.write(b'\n')  # write a '\n' terminated line
+		print(conv_data)
+		time.sleep(.5) # delay 0.5 s
